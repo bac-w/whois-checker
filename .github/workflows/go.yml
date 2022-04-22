@@ -10,17 +10,18 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goos: [linux]
-        goarch: [amd64]
+        goos: [linux, darwin]
+        goarch: [amd64, arm64]
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
         run: go test -v -p=1 -timeout=0 ./...
-      - uses: wangyoucao577/go-release-action@v1.18
+      - uses: wangyoucao577/go-release-action@v1.26
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
+          goversion: "https://dl.google.com/go/go1.18.1.linux-amd64.tar.gz"
           project_path: "."
           binary_name: "wchecker"
           ldflags: "-X 'pkg.BuildDate=$(date -u +%d-%m-%Y/%H:%M)'"
