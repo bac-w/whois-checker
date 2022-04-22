@@ -23,4 +23,4 @@ jobs:
           project_path: "."
           binary_name: "wchecker"
           ldflags: "-X 'pkg.BuildDate=$(date -u +%d-%m-%Y/%H:%M)'"
-          extra_files: LICENSE Readme.md
+          extra_files: LICENSE README.md
