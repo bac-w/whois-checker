@@ -2,7 +2,7 @@
 Simple golang whois checker
 
 # Build
-go build -o wchecker -ldflags "-X 'pkg.BuildDate=$(date -u +%d-%m-%Y/%H:%M)'" main.go
+``go build -o wchecker -ldflags "-X 'pkg.BuildDate=$(date -u +%d-%m-%Y/%H:%M)'" main.go``
 
 # Usage
 #### Run help
