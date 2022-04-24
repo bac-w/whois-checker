@@ -3,6 +3,7 @@ package log
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/fatih/color"
 )
@@ -10,12 +11,14 @@ import (
 func Fatal(v ...interface{}) {
 	if logLevel >= ERROR {
 		log.Fatalf(color.RedString("[FATAL] ")+"%v", v...)
+		os.Exit(1)
 	}
 }
 
 func Fatalf(format string, v ...interface{}) {
 	if logLevel >= ERROR {
 		log.Fatalf(color.RedString("[FATAL] ")+"%v", fmt.Sprintf(format, v...))
+		os.Exit(1)
 	}
 }
 

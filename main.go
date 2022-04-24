@@ -4,13 +4,13 @@ import (
 	"crypto/tls"
 	"fmt"
 	"github.com/alexflint/go-arg"
-	"github.com/likexian/whois"
-	whoisparser "github.com/likexian/whois-parser"
+	"github.com/araddon/dateparse"
 	"golang.org/x/exp/slices"
 	"net"
-	"os"
+	"strings"
 	"time"
 	"whois-checker/pkg/log"
+	"whois-checker/pkg/servers"
 )
 
 type args struct {
@@ -18,7 +18,7 @@ type args struct {
 	Verbose bool   `arg:"-v" help:"Verbose [DEBUG]"`
 	Expire  bool   `arg:"-e,--expire" help:"Find out when domain it expires (days)"`
 	CertExp bool   `arg:"-s,--ssl" help:"Find out when certificate it expires (days)"`
-	DStatus bool   `arg:"--status" help:"Get Domain status"`
+	DStatus bool   `arg:"-w, --whois" help:"Get all whois information by domain"`
 }
 
 var Args args
@@ -43,36 +43,48 @@ func VerboseLevel() int {
 }
 
 func main() {
+	pa := arg.MustParse(&Args)
+	log.Debug("I'm starting")
 	if level, err := log.GetLevel(VerboseLevel()); err != nil {
-		log.Fatalf("Verbose level is incorrect %s", err)
-		os.Exit(1)
+		log.Fatalf("[LOG]: Verbose level is incorrect %s", err)
 	} else {
 		log.SetLevel(level)
 	}
-	pa := arg.MustParse(&Args)
-	if Args.Domain == "" {
-		pa.Fail("You must provide domain name via -d or --domain")
-	}
-	whoisData, err := whois.Whois(Args.Domain)
-	if err != nil {
-		log.Fatalf("Failed get %s", err)
-	}
 	tNow := time.Now()
-	result, err := whoisparser.Parse(whoisData)
-	if err == nil {
+	if Args.Domain != "" {
 		if Args.Expire {
-			tExpr, _ := time.Parse("2006-01-02T15:04:05Z", result.Domain.ExpirationDate)
+			resWho, err := servers.GetWhois(Args.Domain)
+			if err != nil {
+				log.Fatalf("[WHOIS]: %s", err)
+			}
+			log.Debugf("[WHOIS]: Whois information received complete")
+			tExpr, _ := dateparse.ParseAny(resWho.Domain.ExpirationDate)
 			tExprDays := tExpr.Sub(tNow)
-			fmt.Println(int(tExprDays.Hours() / 24))
+			if Args.CertExp {
+				fmt.Print("Domain_expire_through: ")
+			}
+			if resWho.Domain.ExpirationDate == "" {
+				log.Debugf("[WHOIS]: Expiration date not found")
+				fmt.Println(-1)
+				log.Info("Use -v for verbose and check")
+				if strings.Contains(Args.Domain, ".kz") || strings.Contains(Args.Domain, ".md") {
+					log.Debug("Zones KZ and MD not supported. Information received " +
+						"from whois servers in zone does not have an end date. View only if use website")
+				}
+			} else {
+				fmt.Println(int(tExprDays.Hours() / 24))
+			}
+			//} else if Args.DStatus {
+			//	fmt.Println(result.Domain.Status)
 		}
 		if Args.CertExp {
 			conf := &tls.Config{
 				InsecureSkipVerify: true,
 			}
-			dialer := &net.Dialer{Timeout: 5 * time.Second}
-			conn, err := tls.DialWithDialer(dialer, "tcp", Args.Domain+":443", conf)
+			dialerTLS := &net.Dialer{Timeout: 10 * time.Second}
+			conn, err := tls.DialWithDialer(dialerTLS, "tcp", Args.Domain+":443", conf)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatalf("[SSL]: %s", err)
 			}
 			defer conn.Close()
 			certs := conn.ConnectionState().PeerCertificates
@@ -80,14 +92,17 @@ func main() {
 				if slices.Contains(cert.DNSNames, Args.Domain) {
 					tExpr := cert.NotAfter
 					tExprDays := tExpr.Sub(tNow)
+					if cert.DNSNames == nil {
+						log.Fatalf("[SSL]: Certificate on domain %s not found", Args.Domain)
+					}
+					if Args.Expire {
+						fmt.Print("Cert_expire_through: ")
+					}
 					fmt.Println(int(tExprDays.Hours() / 24))
 				}
 			}
 		}
-		if Args.DStatus {
-			fmt.Println(result.Domain.Status)
-		}
 	} else {
-		log.Fatal(err)
+		pa.Fail("You must provide domain name via -d or --domain")
 	}
 }
