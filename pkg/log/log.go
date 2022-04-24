@@ -57,7 +57,21 @@ func Infof(format string, v ...interface{}) {
 		log.Printf(color.GreenString("[INFO] ")+"%v", fmt.Sprintf(format, v...))
 	}
 }
-
+func InfoI(messageName string) {
+	if logLevel >= INFO {
+		fmt.Println(color.GreenString("%s", messageName))
+	}
+}
+func InfoIp(messageName string) {
+	if logLevel >= INFO {
+		fmt.Print(color.GreenString("%s", messageName))
+	}
+}
+func InfoIf(messageName string, v ...interface{}) {
+	if logLevel >= INFO {
+		fmt.Printf(color.GreenString("%s", messageName)+"%v", v...)
+	}
+}
 func Debug(v ...interface{}) {
 	if logLevel >= DEBUG {
 		log.Printf(color.YellowString("[DEBUG] ")+"%v", v...)

@@ -7,14 +7,21 @@ go build -o wchecker -ldflags "-X 'pkg.BuildDate=$(date -u +%d-%m-%Y/%H:%M)'" ma
 # Usage
 #### Run help
 
-```wchecker -h```
+``wchecker -h``
 
+#### *REQUIRED
+#### Indicate domain name*
+``Use -d* to indicate domain name``
+
+#### Check whois information
+
+``wchecker -d google.com -w``
 
 #### Check domain epire (in days)
 
-```wchecker -d google.com -e```
+``wchecker -d google.com -e``
 
 
 #### Check ssl certificate expire (in days)
 
-```wchecker -d google.com -s```
+``wchecker -d google.com -s``

@@ -60,8 +60,8 @@ func main() {
 			log.Debugf("[WHOIS]: Whois information received complete")
 			tExpr, _ := dateparse.ParseAny(resWho.Domain.ExpirationDate)
 			tExprDays := tExpr.Sub(tNow)
-			if Args.CertExp {
-				fmt.Print("Domain_expire_through: ")
+			if Args.CertExp || Args.DFull {
+				log.InfoIp("Domain_expire_through: ")
 			}
 			if resWho.Domain.ExpirationDate == "" {
 				log.Debugf("[WHOIS]: Expiration date not found")
@@ -80,7 +80,15 @@ func main() {
 			if err != nil {
 				log.Fatalf("[WHOIS]: %s", err)
 			}
-			fmt.Println(resWho.Domain)
+			log.InfoI("Administrative: ")
+			fmt.Println("Status: ", resWho.Domain.Status)
+			fmt.Println("Created date: ", resWho.Domain.CreatedDate)
+			fmt.Println("Updated date: ", resWho.Domain.UpdatedDate)
+			fmt.Println("Expiration date: ", resWho.Domain.ExpirationDate)
+			fmt.Println("Registrant info: ", resWho.Registrant)
+			log.InfoI("Technical: ")
+			fmt.Println("Name servers: ", resWho.Domain.NameServers)
+			fmt.Println("Whois servers: ", resWho.Domain.WhoisServer)
 		}
 		if Args.CertExp {
 			conf := &tls.Config{
@@ -100,8 +108,8 @@ func main() {
 					if cert.DNSNames == nil {
 						log.Fatalf("[SSL]: Certificate on domain %s not found", Args.Domain)
 					}
-					if Args.Expire {
-						fmt.Print("Cert_expire_through: ")
+					if Args.Expire || Args.DFull {
+						log.InfoIp("Cert_expire_through: ")
 					}
 					fmt.Println(int(tExprDays.Hours() / 24))
 				}
