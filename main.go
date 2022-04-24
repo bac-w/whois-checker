@@ -18,7 +18,7 @@ type args struct {
 	Verbose bool   `arg:"-v" help:"Verbose [DEBUG]"`
 	Expire  bool   `arg:"-e,--expire" help:"Find out when domain it expires (days)"`
 	CertExp bool   `arg:"-s,--ssl" help:"Find out when certificate it expires (days)"`
-	DStatus bool   `arg:"-w, --whois" help:"Get all whois information by domain"`
+	DFull   bool   `arg:"-w, --whois" help:"Get all whois information by domain"`
 }
 
 var Args args
@@ -74,8 +74,13 @@ func main() {
 			} else {
 				fmt.Println(int(tExprDays.Hours() / 24))
 			}
-			//} else if Args.DStatus {
-			//	fmt.Println(result.Domain.Status)
+		}
+		if Args.DFull {
+			resWho, err := servers.GetWhois(Args.Domain)
+			if err != nil {
+				log.Fatalf("[WHOIS]: %s", err)
+			}
+			fmt.Println(resWho.Domain)
 		}
 		if Args.CertExp {
 			conf := &tls.Config{
