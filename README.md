@@ -15,6 +15,6 @@ go build -o wchecker -ldflags "-X 'pkg.BuildDate=$(date -u +%d-%m-%Y/%H:%M)'" ma
 ```wchecker -d google.com -e```
 
 
-#### Check ssl certificate epire (in days)
+#### Check ssl certificate expire (in days)
 
 ```wchecker -d google.com -s```
