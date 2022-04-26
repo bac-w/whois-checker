@@ -24,8 +24,8 @@ type args struct {
 var Args args
 
 var pkgBuildDate string
-var pkgMaintainer = "Leonov Vitaliy"
-var pkgVersion = "0.1"
+var pkgMaintainer = "https://github.com/bac-w"
+var pkgVersion = "0.2"
 var pkgUrl = "https://github.com/bac-w/whois-checker"
 
 func (args) Version() string {
